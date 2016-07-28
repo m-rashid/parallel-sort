@@ -35,7 +35,7 @@ public class mergesortParallel extends RecursiveAction{
     @Override
     public void compute(){
         int middle = start + (end-start)/2;
-        
+            
         if(end-start <= threshold){
             Arrays.sort(arr, start, end);    
             return;
@@ -50,6 +50,11 @@ public class mergesortParallel extends RecursiveAction{
     }
     
     public void sequentialMerge(int middle){
+        int largerMid = (getLarger().size())/2;
+        
+        int smallerMidPos = Arrays.binarySearch(getSmaller().arr, largerMid);
+        
+        
         
         
         
@@ -61,6 +66,14 @@ public class mergesortParallel extends RecursiveAction{
     
     public mergesortParallel getLarger(){
         if(left.size()>right.size()){
+            return left;
+        }
+        return right;
+        
+    }
+    
+    public mergesortParallel getSmaller(){
+        if(left.size()<right.size()){
             return left;
         }
         return right;
