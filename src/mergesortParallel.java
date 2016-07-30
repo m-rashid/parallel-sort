@@ -1,172 +1,102 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author merashid27
- */
-
-import java.util.Arrays;
+/*import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
-import java.util.*;
 
-public class mergesortParallel extends RecursiveAction{
-   
-    int threshold;
-    
-    int start;
-    int end;
-    static int[] arr;
-    mergesortParallel left;
-    mergesortParallel right;
-    
-    public mergesortParallel(int[] arr, int start, int end, int threshold){
-        this.arr = arr;
-        this.start = start;
-        this.end = end;
-        this.threshold = threshold;
-        
-        
+public class mergesortParallel extends RecursiveAction {
+	private int[] arr;
+    private int start, end;
+    private int threshold;
+
+    public mergesortParallel(int[] arr, int start, int end, int threshold) {
+            this.arr = arr;
+            this.start = start;
+            this.end = end;
+            this.threshold = threshold;
     }
-    
+
     @Override
-    public void compute(){
-        int middle = start + (end-start)/2;
-            
-        if(end-start <= threshold){
-            Arrays.sort(arr, start, end);    
-            return;
-        }
-        
-        invokeAll(
-               new mergesortParallel(arr, start, middle, threshold),
-               new mergesortParallel(arr, middle, end, threshold) 
-        );
-        sequentialMerge(middle);
-        
-        
-            
-    }
-    
-    /*
-    public void sequentialMerge(int middle){
-        
-        int[] temp = new int[arr.length];
-        int tempStart = 0;
-        int leftStart = start;
-        int rightStart = middle;
-        int rightEnd = end;
-        int leftEnd = middle-1;
-        
-        while(leftStart<=leftEnd && rightStart<=rightEnd){
-            if(arr[leftStart]<=arr[rightStart]){
-                temp[tempStart++] = arr[leftStart++];
+    protected void compute() {
+            if (end - start <= threshold) {
+                    // sequential sort
+                    Arrays.sort(arr, start, end);
+                    return;
             }
-            else{
-                temp[tempStart++] = arr[rightStart++];
-            }
-        }
-        
-        while(leftStart<=leftEnd){
-            temp[tempStart++] = arr[leftStart++];
-        }
-        
-        while(rightStart<=rightEnd){
-            temp[tempStart++] = arr[rightStart++];
-        }
-        
-        /*
-        for(int i = arr.length-1 ; i>0; i--, rightEnd--){
-            arr[rightEnd]=temp[i];
-        }
-        
-        
-        for(int i : temp){
-            System.out.println(i);
-        }
+
+            // Sort halves in parallel
+            int mid = start + (end-start) / 2;
+            invokeAll(
+                    new mergesortParallel(arr, start, mid, threshold),
+                    new mergesortParallel(arr, mid, end, threshold) );
+
+            // sequential merge
+            sequentialMerge(mid);
     }
-    */
-    
-    //copy to temp[]
-    
-    public void sequentialMerge(int middle){
-        int temp[] = new int[arr.length];
+
+    private void sequentialMerge(int mid) {
+         //implement the merge
         
-        //copy everything into temp[]
-        for(int i = start; i<=end; i++){
-            temp[i] = arr[i];
-            
-            
-        }
-        
-        
+        int[] temp = new int[(end-start)+1];
         
         int i = start;
-        int j = middle+1;
-        int k = start;
+        int h = start;
+        int j = mid+1;
+        int k;
         
-        //i<=middle && j<=end
-        while(true){
-            while(i<=middle){
-                 arr[k] = temp[i];
-               
-            k++;
-            i++;
-            }
-            
-            while(j<end){
-                arr[k] = temp[j];
-                //k++;
-               j++;
-            }
-            
-            if(temp[i] <= temp[j]){
-                arr[k] = temp[i];
-               // i++;
+        while(h<=mid && j<=end){
+            if(arr[h]<=arr[j]){
+                //temp[i] = arr[h];
+                temp = Arrays.copyOf(arr, h);
+                h++;
             }
             else{
-                arr[k] = temp[j];
+                temp[i] = arr[j];
                 j++;
             }
-            k++;
-        }
-        
-        //whatever remains in the left array
-        /*
-        while(i<=middle){
-            arr[k] = temp[i];
-            k++;
             i++;
         }
-        */
-        /*
-        for(int m : temp){
-            System.out.println(m);
-        }
-        */
         
+        if(h>mid){
+            
+                for(k=j ; k<=end; k++){
+                    
+                        temp[i] = arr[k];
+                    
+                        i++;
+                    
+                }
+            
+        }
+        
+        else{
+            for(k=h; k<=mid; k++){
+                temp[i] = arr[k];
+                i++;
+            }
+        }
+        
+        for(k=start; k<=end; k++){
+            
+            arr[k] = temp[k];
+            }
+        
+        
+
     }
-    
-    
-    
-    public static void main(String[] args){
-        int[] array = {4,1,2,7,8,6,12,11}; //20 elements
+ /*
+     public static void main(String[] args){
+        int[] array = {4,1,2,7,8,6,12,11, 22, 23, 56, 78, 66, 19, 15, 45,28,32,49,52}; //20 elements
         
         mergesortParallel sort = new mergesortParallel(array, 0, array.length-1, 4);
         
         ForkJoinPool pool = new ForkJoinPool();
         pool.invoke(sort);
         
-        for(int i : arr){
+        for(int i : array){
             System.out.println(i);
         }
                 
                 
     }
-    
-
+//
 }
+*/
