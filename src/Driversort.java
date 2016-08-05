@@ -1,4 +1,5 @@
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ForkJoinPool;
@@ -33,16 +34,16 @@ public class Driversort {
     
     static int threads;
     
+    static ArrayList NoOfThreads = new ArrayList();
+    
+    static ArrayList runTimes = new ArrayList();
+    
      public static void start(){
-        startTime = System.currentTimeMillis();
+        startTime = System.nanoTime();
     }
     
     public static float stop(){
-        return (System.currentTimeMillis() - startTime) / 1000.0f;
-    }
-    
-    public static void reset(){
-        startTime = 0;
+        return (System.nanoTime() - startTime)/1000000.0f;
     }
 
     public static int randInt(int min, int max){
@@ -52,6 +53,10 @@ public class Driversort {
         return random;
     }
     
+    public static int randThread(ArrayList list){
+        int rand = new Random().nextInt(list.size());
+        return (int)list.get(rand);
+    }
     
     public static void main(String[] args){
         
@@ -94,52 +99,55 @@ public class Driversort {
         }
         */
         
+        //arraySizeCurrent = arraySizeMin;
         
-        arraySizeCurrent = arraySizeMin;
         array = new int[arraySizeMax];
         
         for(int i=0; i<arraySizeMax; i++){
-            array[i] = randInt(0, arraySizeMax*10);
+            array[i] = randInt(0, arraySizeMax);
         }
         
-        for(int i = 0; i<arraySizeCurrent; i++){
-            array = new int[arraySizeCurrent];
-            copy = new int[arraySizeCurrent];
-            copy2 = new int[arraySizeCurrent];
-            System.arraycopy(array, 0, copy, 0, arraySizeCurrent);
-            System.arraycopy(array, 0, copy2, 0, arraySizeCurrent);
-            reset();
-            start();
-            Arrays.sort(copy2);
-            T1 = stop();
-                
+        for(int i=2; i<=4096; i*=2){
+            NoOfThreads.add(i);
+        }
+        
+        for(int i = arraySizeMin; i<=arraySizeMax; i+=arraySizeIncr){
+            copy = new int[i];
+            copy2 = new int[i];
+            System.arraycopy(array, 0, copy, 0, i);
+            System.arraycopy(array, 0, copy2, 0, i);
             
             //array[i] = ThreadLocalRandom.current().nextInt(arraySizeMin, arraySizeMax);
             //array[i] = randInt(arraySizeMin, arraySizeMax);
-            
+            /*
             for(int t=2; t<=1024; t*=2){
                 threads = t;
-                threshold = arraySizeCurrent/t;
-            
+                threshold = i/t;
+            */
+                
                 for(int j = 0; j<5; j++){
-                    reset();
-                    MergesortParallel sort = new MergesortParallel(copy, 0, array.length, threshold);
+                    threads = randThread(NoOfThreads);
+                    threshold = i/threads;
+                    QuicksortParallel sort = new QuicksortParallel(copy, 0, copy.length-1, threshold);
                     System.gc();
                     ForkJoinPool pool = new ForkJoinPool();
                     start();
                     pool.invoke(sort);
                     T2 = stop();
-                    System.out.println("The run took "+T2 );
+                    
+                    start();
+                    Arrays.sort(copy2);
+                    T1 = stop();
+                    System.out.println("The parallel run took "+T2+"ms" );
+                    System.out.println("The sequential run took "+T1+"ms" );
+                    System.out.println("Array size: "+i);
                     System.out.println("Number of threads: "+threads);
-                    break;
-
+                    System.out.println("Speed up: "+T1/T2);
+                    System.out.println(" ");
+                    
                 }
             }
-            arraySizeCurrent += arraySizeIncr;
-        }
-        
-        
-        
+           
         
     }
     
