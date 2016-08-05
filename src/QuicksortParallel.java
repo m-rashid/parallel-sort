@@ -41,10 +41,38 @@ public class QuicksortParallel extends RecursiveAction{
        }
    }
    
-   public void sort(int[] arr, int start, int end){
+   public int partition(int[] arr, int start, int end){
+       
+       int pivot = arr[start + (end-start)/2];
+       int i = start;
+       int j = end-1;
+       
+       while(i<=j){
+           while(i<=j && arr[i]<=pivot){
+               ++i;
+           }
+           
+           while(i<=j && arr[j]>=pivot){
+               --j;
+           }
+           
+           if(i<j){
+               swap(arr, i, j);
+           }
+       }
+       
+      
+       swap(arr, i, end);
+       
+       return i;
        
        
-       
+   }
+   
+   public void swap(int[] array, int one, int two){
+       int temp = array[one];
+       array[one] = array[two];
+       array[two] = temp;
    }
     
     
